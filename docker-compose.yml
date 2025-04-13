@@ -1,0 +1,37 @@
+version: '3.3'
+services:
+
+  xxx:
+    image: xxx
+    container_name: xxx
+    environment:
+      FILE_SERVICE_HOST: https://file.j1.sale
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: 0xapUdhU
+
+    volumes:
+      - /data/xxx/src:/data/xxx/src
+
+      # - /data/caidao:/data/caidao
+#    depends_on:
+#      - redis
+    restart: unless-stopped
+    ports:
+      - 8000:8000
+
+#  redis:
+#    image: redis:latest
+#    container_name: redis
+#    command: redis-server /etc/redis/redis.conf
+#    ports:
+#      - 6379:6379
+#    volumes:
+#      - ./redis.conf:/etc/redis/redis.conf
+#      - /data/redis/:/data/
+
+
+networks:
+  default:
+    external:
+      name: my_net

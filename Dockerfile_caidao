@@ -1,0 +1,17 @@
+FROM python:3.9.12
+
+COPY deploy/sources.list /etc/apt/sources.list
+
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 3B4FE6ACC0B21F32
+
+RUN apt-get update
+RUN apt-get upgrade -y
+RUN apt-get install -y libx11-xcb1
+RUN apt-get install -y  libgl1-mesa-glx
+
+COPY caidao /caidao
+WORKDIR /data/sd-service
+
+RUN pip3 install -r requirements_base.txt -i https://mirrors.aliyun.com/pypi/simple/
+
+
