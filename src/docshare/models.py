@@ -111,6 +111,8 @@ class 抖音视频(AbstractModel):
     视频链接本地 = models.URLField(null=True)
     文案 = models.TextField(null=True)
     文案_完成 = models.BooleanField(default=False, db_index=True)
+    是否淘汰 = models.BooleanField(default=False, db_index=True)
+    是否用过 = models.BooleanField(default=False, db_index=True)
 
     @classmethod
     def 清理所有状态(cls):

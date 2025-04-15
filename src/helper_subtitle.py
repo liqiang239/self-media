@@ -2,7 +2,6 @@ import time
 
 import requests
 
-from base.management.commands.cmd import kill_chrome
 from helper_56tool import 灵动爬虫, ParseUrlError
 
 CRAWLER_HOST = 'http://localhost:8000'
@@ -22,22 +21,24 @@ def 更新字幕数据(task_id, txt):
 # 功能
 
 def 获取字幕():
-    kill_chrome()
     爬虫 = 灵动爬虫()
     try_times = 3
     while try_times:
         task = 获取字幕任务()
         if not task:
             time.sleep(1)
-            continue
+            break
         # url = task['视频链接']
         url = task['分享链接']
 
-        txt = 爬虫.提取视频文案(url)
+
         try:
+            txt = 爬虫.提取视频文案(url)
             更新字幕数据(task['id'], txt)
             try_times = 3
         except ParseUrlError:
+            print('获取文案异常')
             try_times -= 1
+            time.sleep(1)
 
 

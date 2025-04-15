@@ -14,6 +14,7 @@ from selenium.common.exceptions import SessionNotCreatedException, TimeoutExcept
 import urllib3
 
 from base.models import 头条热榜新闻, 处理记录, 评论, 回复
+from helper_subtitle import 获取字幕
 
 from helper_toutiao import 头条爬虫
 
@@ -255,6 +256,7 @@ class Command(BaseCommand):
         parser.add_argument("--run", action="store_true", default=False)
         
         parser.add_argument("--爬取所有医生号的所有视频", action="store_true", default=False)
+        parser.add_argument("--get_subtitle", action="store_true", default=False)
 
     def handle(self, *args, **options):
         if options.get("testit"):
@@ -310,9 +312,15 @@ class Command(BaseCommand):
             return
 
         if options.get("爬取所有医生号的所有视频"):
+            kill_chrome()
             for obj in 抖音医生号.objects.all():
                 obj.全部抓取所有视频()
-                
+            kill_chrome()
+            获取字幕()
+
+        if options.get("get_subtitle"):
+            kill_chrome()
+            获取字幕()
                 
         if options.get("run"):
             运行所有任务()
