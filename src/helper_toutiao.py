@@ -65,9 +65,9 @@ class 头条爬虫(object):
         self.go_homepage()
 
     @classmethod
-    def 得到爬虫单例(cls):
+    def 得到爬虫单例(cls, **kwargs):
         if cls.单例 is None:
-            cls.单例 = cls()
+            cls.单例 = cls(**kwargs)
         return cls.单例
     
     @classmethod

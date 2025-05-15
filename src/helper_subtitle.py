@@ -22,8 +22,8 @@ def 更新字幕数据(task_id, txt):
 
 def 获取字幕():
     爬虫 = 灵动爬虫()
-    try_times = 3
-    while try_times:
+    try_times = 5
+    while 1:
         task = 获取字幕任务()
         if not task:
             time.sleep(1)
@@ -40,5 +40,9 @@ def 获取字幕():
             print('获取文案异常')
             try_times -= 1
             time.sleep(1)
+
+        if not try_times:
+            更新字幕数据(task['id'], 'error')
+            try_times = 3
 
 

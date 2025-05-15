@@ -312,11 +312,18 @@ class Command(BaseCommand):
             return
 
         if options.get("爬取所有医生号的所有视频"):
-            kill_chrome()
-            for obj in 抖音医生号.objects.all():
-                obj.全部抓取所有视频()
-            kill_chrome()
-            获取字幕()
+            间隔秒数 = 3600 * 24
+            while 1:
+                需要抓取视频的账号列表 = 抖音医生号.获取需要爬取的账号(间隔秒数)
+                if 需要抓取视频的账号列表:
+                    kill_chrome()
+                for obj in 需要抓取视频的账号列表:
+                    obj.全部抓取所有视频()
+                    obj.save()
+                kill_chrome()
+                获取字幕()
+                time.sleep(1)
+                # kill_chrome()
 
         if options.get("get_subtitle"):
             kill_chrome()

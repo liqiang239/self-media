@@ -1,14 +1,20 @@
+import datetime
+import time
+
 from django.db import models
 from django.forms import model_to_dict
-
+from django.db.models.query_utils import Q
 # Create your models here.
+from django.utils import timezone
 
 from caidao_tools.django.abstract import AbstractModel
 from helper_douyin import 抖音爬虫
 from django.db.transaction import atomic
-import time
 from selenium.webdriver.common.keys import Keys
 
+from my_project.settings import CONFIGS
+
+headless = CONFIGS.get('headless', False)
 
 class 抖音医生号(AbstractModel):
     抖音号 = models.CharField(max_length=50, unique=True)
@@ -18,8 +24,12 @@ class 抖音医生号(AbstractModel):
     def __str__(self):
         return self.抖音号
 
+    @classmethod
+    def 获取需要爬取的账号(cls, 间隔秒数):
+        return cls.objects.filter(Q(已全部抓取=False) | Q(update_time__lte=timezone.now() - datetime.timedelta(seconds=间隔秒数)))
+
     def 爬虫到主页(self):
-        pa = 抖音爬虫.得到爬虫单例()
+        pa = 抖音爬虫.得到爬虫单例(headless=headless)
         pa.go(self.链接)
         time.sleep(3)
         e = pa.find_element_css(
@@ -30,7 +40,7 @@ class 抖音医生号(AbstractModel):
 
     @property
     def 当前页面数据字典(self):
-        pa = 抖音爬虫.得到爬虫单例()
+        pa = 抖音爬虫.得到爬虫单例(headless=headless)
         return list(pa.得到所有json("https://www.douyin.com/aweme/v1/web/aweme/post"))
 
     @property
@@ -100,19 +110,24 @@ class 抖音医生号(AbstractModel):
 
 # https://v96.douyinvod.com/d199fd3b8cbd768a6dd8d6d31fc355ef/67ee43e3/video/tos/cn/tos-cn-ve-15/oAF3GQsIDXB6fCAqAEfVAngeFFJgyMBBbxa76w/?a=1128&ch=0&cr=0&dr=0&er=0&cd=0%7C0%7C0%7C0&cv=1&br=1391&bt=1391&cs=0&ds=4&ft=V4TLtMPfRR0s~dC52Dv2Nc0iPMgzbLZAS21U_4~fCjV9Nv7TGW&mime_type=video_mp4&qs=0&rc=ZGU0aGZnaGY7Njo4ZTo6ZUBpam9oZnI5cmV5czMzNGkzM0AzLi5fXjNiNWAxX19iYmM1YSMzMi5mMmQ0cWtgLS1kLTBzcw%3D%3D&btag=c0000e000a8000&cc=2c&cquery=100y&dy_q=1743664446&feature_id=46a7bb47b4fd1280f3d3825bf2b29388&l=2025040315140678D421EAE4C9AF04340D&req_cdn_type=
 class 抖音视频(AbstractModel):
-    抖音号 = models.ForeignKey("抖音医生号", on_delete=models.CASCADE)
+    抖音号 = models.ForeignKey("抖音医生号", on_delete=models.CASCADE, db_index=True)
     唯一号 = models.PositiveBigIntegerField(null=True)
-    视频链接 = models.URLField()
+    视频链接 = models.URLField(max_length=500)
     视频字幕 = models.TextField()
     视频字幕_完成 = models.BooleanField(default=False, db_index=True)
     视频标题 = models.CharField(max_length=100)
     视频描述 = models.TextField(null=True)
-    分享链接 = models.URLField(null=True)
-    视频链接本地 = models.URLField(null=True)
-    文案 = models.TextField(null=True)
+    分享链接 = models.URLField(null=True, max_length=500)
+    视频链接本地 = models.URLField(null=True, blank=True)
+    文案 = models.TextField(null=True,  blank=True)
     文案_完成 = models.BooleanField(default=False, db_index=True)
-    是否淘汰 = models.BooleanField(default=False, db_index=True)
+    是否有用 = models.BooleanField(default=False, db_index=True)
     是否用过 = models.BooleanField(default=False, db_index=True)
+    是否淘汰 = models.BooleanField(default=False, db_index=True)
+
+    视频新标题 = models.CharField(max_length=100, null=True, blank=True)  # TODO 大模型生成
+    视频新标签 = models.CharField(max_length=100, null=True, blank=True)  # TODO 大模型生成
+    结尾金句 = models.TextField(null=True, blank=True)  # TODO 大模型生成
 
     @classmethod
     def 清理所有状态(cls):
